@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="transform.xsl"?>
+<plugins>
+    <plugin>
+        <name>Teste</name>
+        <url>git://github.com/fabricioferracioli/plugin_manager.git</url>
+        <description>Isso é um teste</description>
+        <keywords>test, teste</keywords>
+    </plugin>
+    <plugin>
+        <name>Teste</name>
+        <url>git://github.com/lucius/plugin_manager.git</url>
+        <description>Isso é um teste</description>
+        <keywords>test, teste</keywords>
+    </plugin>
+</plugins>

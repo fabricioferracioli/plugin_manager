@@ -2,312 +2,331 @@
 App::import('Plugins', 'ImprovedCakeShell.ImprovedCakeShell');
 
 class RepositoriesTask extends ImprovedCakeShell {
-	var $tasks = array('Plugins');
-	var $repositories = array();
-	var $path = null;
-	
-	function __construct(&$dispatch) {
-		parent::__construct($dispatch);
+    var $tasks = array('Plugins');
+    var $repositories = array();
+    var $path = null;
 
-		$this->path = $this->params['working'] . DS . 'plugins/plugin_manager/.reps';
-		$this->_parser();
-	}
+    function __construct(&$dispatch) {
+        parent::__construct($dispatch);
 
-	/**
-	 * Adiciona um novo repositório se ele já não estiver na lista
-	 */
-	//TODO: Adicionar uma parametro $name ao repositorio para fácil acesso e identificacao
-	function add($url) {
-		$this->formattedOut(String::insert(__d('plugin', 'Inserindo repositorio [u]:rep_url[/u] [/fg]', true), array('rep_url'=> $url)), false);
+        $this->path = $this->params['working'] . DS . 'plugins/plugin_manager/.reps';
+        $this->_parser();
+    }
 
-		if ($this->_isHttp($url)) {
-			if ($this->_exists($url)) {
-				$this->formattedOut(__d('plugin', "[b] ... [/b]\n  -> O repositorio ja existe\n", true));
-				$this->hr();
-				$this->_stop();
-			}
+    /**
+    * Adiciona um novo repositório se ele já não estiver na lista
+    */
+    //TODO: Adicionar uma parametro $name ao repositorio para fácil acesso e identificacao
+    function add($url) {
+        $this->formattedOut(String::insert(__d('plugin', 'Inserindo repositorio [u]:rep_url[/u] [/fg]', true), array('rep_url'=> $url)), false);
 
-			array_push($this->repositories, trim($url));
+        if ($this->_isHttp($url)) {
+            if ($this->_exists($url)) {
+                $this->formattedOut(__d('plugin', "[b] ... [/b]\n  -> O repositorio ja existe\n", true));
+                $this->hr();
+                $this->_stop();
+            }
 
-			if ($this->_save()) {
-				$this->formattedOut(__d('plugin', '[bg=green][fg=black]  OK  [/fg][/bg]', true));
-			} else {
-				$this->formattedOut(__d('plugin', "[bg=red][fg=black] ERRO [/fg][/bg]\n  -> O arquivo nao pode ser acessado", true));
-			}
-		} else {
-			$this->formattedOut(__d('plugin', "[bg=red][fg=black] ERRO [/fg][/bg]\n  -> O parametro a ser adicionado nao parece ser uma URL", true));
-		}
-	}
+            array_push($this->repositories, trim($url));
 
-	/**
-	 * Remove um repositorio do arquivo .reps
-	 */
-	function remove($url = null) {
-		$this->formattedOut(String::insert(__d('plugin', '[fg=red]Excluindo[/fg] repositorio [u]:rep_url[/u] [/fg]', true), array('rep_url' =>  $url)), false);
+            if ($this->_save()) {
+                $this->formattedOut(__d('plugin', '[bg=green][fg=black]  OK  [/fg][/bg]', true));
+            } else {
+                $this->formattedOut(__d('plugin', "[bg=red][fg=black] ERRO [/fg][/bg]\n  -> O arquivo nao pode ser acessado", true));
+            }
+        } else {
+            $this->formattedOut(__d('plugin', "[bg=red][fg=black] ERRO [/fg][/bg]\n  -> O parametro a ser adicionado nao parece ser uma URL", true));
+        }
+    }
 
-		if (empty($url)) {
-			$url = $this->_select();
-		}
+    /**
+    * Remove um repositorio do arquivo .reps
+    */
+    function remove($url = null) {
+        $this->formattedOut(String::insert(__d('plugin', '[fg=red]Excluindo[/fg] repositorio [u]:rep_url[/u] [/fg]', true), array('rep_url' =>  $url)), false);
 
-		if (!$this->_exists($url)) {
-			$this->formattedOut(__d('plugin', "[bg=red][fg=black] ERRO [/fg][/bg]\n  -> O repositorio nao existe", true));
-			$this->out('');
-			$this->hr();
-			$this->_stop();
-		}
+        if (empty($url)) {
+            $url = $this->_select();
+        }
 
-		unset($this->repositories[array_search($url, $this->repositories)]);
+        if (!$this->_exists($url)) {
+            $this->formattedOut(__d('plugin', "[bg=red][fg=black] ERRO [/fg][/bg]\n  -> O repositorio nao existe", true));
+            $this->out('');
+            $this->hr();
+            $this->_stop();
+        }
 
-		if ($this->_save()) {
-			$this->formattedOut(__d('plugin', '[bg=green][fg=black]  OK  [/fg][/bg]', true));
-		} else {
-			$this->formattedOut(__d('plugin', "[bg=red][fg=black] ERRO [/fg][/bg]\n  -> O arquivo nao pode ser acessado", true));
-		}
-	}
+        unset($this->repositories[array_search($url, $this->repositories)]);
 
-	/**
-	 * Lista todos os plugins de um repositorio
-	 */
-	function plugins($url = null, $proxy = false) {
-		while (empty($url)) {
-			$url = $this->_select();
-		}
-		$this->_show($url, $proxy);
-	}
+        if ($this->_save()) {
+            $this->formattedOut(__d('plugin', '[bg=green][fg=black]  OK  [/fg][/bg]', true));
+        } else {
+            $this->formattedOut(__d('plugin', "[bg=red][fg=black] ERRO [/fg][/bg]\n  -> O arquivo nao pode ser acessado", true));
+        }
+    }
 
-	function find($pattern, $proxy = false) {
-		$this->formattedOut(String::insert(__d('plugin', "Buscando plugins: [u]:pattern[/u]\n", true), array('pattern' => $pattern)));
+    /**
+    * Lista todos os plugins de um repositorio
+    */
+    function plugins($url = null, $proxy = false) {
+        while (empty($url)) {
+            $url = $this->_select();
+        }
+        $this->_show($url, $proxy);
+    }
 
-		$plugins = $this->_find($pattern, $proxy);
+    function find($pattern, $proxy = false) {
+        $this->formattedOut(String::insert(__d('plugin', "Buscando plugins: [u]:pattern[/u]\n", true), array('pattern' => $pattern)));
 
-		if (empty($plugins)) {
-			$this->formattedOut(__d('plugin', "Nao foram encontrados plugins\n", true));
-			$this->hr();
-			$this->_stop();
-		}
+        $plugins = $this->_find($pattern, $proxy);
 
-		foreach($plugins as $plugin) {
-			$out = String::insert(__d('plugin', "[fg=green]    :pluginName", true), array('pluginName'=> $plugin['name']));
+        if (empty($plugins)) {
+            $this->formattedOut(__d('plugin', "Nao foram encontrados plugins\n", true));
+            $this->hr();
+            $this->_stop();
+        }
 
-			if ($this->Plugins->_exists($plugin['name'])) {
-				$out .= __d('plugin', " *[/fg]\n", true);
-			} else {
-				$out .= String::insert(__d('plugin', "[/fg]\n      :pluginUrl\n", true), array('pluginUrl'=> $plugin['url']));
-			}
+        foreach($plugins as $plugin) {
+            $out = String::insert(__d('plugin', "[fg=green]    :pluginName", true), array('pluginName'=> $plugin['name']));
 
-			$this->formattedOut($out);
-		}
+            if ($this->Plugins->_exists($plugin['name'])) {
+                $out .= __d('plugin', " *[/fg]\n", true);
+            } else {
+                $out .= String::insert(__d('plugin', "[/fg]\n      :pluginUrl\n", true), array('pluginUrl'=> $plugin['url']));
+            }
+
+            $this->formattedOut($out);
+        }
 
 
-		$this->formattedOut(__d('plugin', '* Plugins ja instalados', true));
-	}
+        $this->formattedOut(__d('plugin', '* Plugins ja instalados', true));
+    }
 
-	/**
-	 * Retorna todos os plugins encontrados através do $pattern
-	 */
-	function _find($pattern, $proxy = false) {
-		$allPlugins = $this->_plugins();
-		if (empty($allPlugins)) {
-			return false;
-		}
-		$plugins = array();
-		foreach($allPlugins as $plugin) {
-			if (preg_match('/.*'. $pattern . '.*/', $plugin['name'])) {
-				$plugins[] = $plugin;
-			}
-		}
-		return $plugins;
-	}
+    /**
+    * Retorna todos os plugins encontrados através do $pattern
+    */
+    function _find($pattern, $proxy = false) {
+        $allPlugins = $this->_plugins();
+        if (empty($allPlugins)) {
+            return false;
+        }
+        $plugins = array();
+        foreach($allPlugins as $plugin) {
+            if (preg_match('/.*'. $pattern . '.*/', $plugin['name'])) {
+                $plugins[] = $plugin;
+            }
+        }
+        return $plugins;
+    }
 
-	/**
-	 * Carrega a lista de repositorios do arquivo
-	 */
-	function _parser() {
-		if (!file_exists($this->path)) {
-			//TODO: Ao invés de mostrar um erro, cria um novo arquivo com o repositorio padrão
-			$errorMessage = String::insert(__d('plugin', " [fg=red]O arquivo de repositorios nao pode ser encontrado!\n O local correto do arquivo e :path [/fg]\n", true), array('path' => $this->path));
-			$this->formattedOut($errorMessage);
-			$this->hr();
-			$this->_stop();
-		}
+    /**
+    * Carrega a lista de repositorios do arquivo
+    */
+    function _parser() {
+        if (!file_exists($this->path)) {
+            //TODO: Ao invés de mostrar um erro, cria um novo arquivo com o repositorio padrão
+            $errorMessage = String::insert(__d('plugin', " [fg=red]O arquivo de repositorios nao pode ser encontrado!\n O local correto do arquivo e :path [/fg]\n", true), array('path' => $this->path));
+            $this->formattedOut($errorMessage);
+            $this->hr();
+            $this->_stop();
+        }
 
-		$fileContent = file_get_contents($this->path);
-		$repositories = explode("\n", $fileContent);
-		foreach($repositories as $repository) {
-			$repository = trim($repository);
-			if($this->_isHttp($repository)) {
-				$this->repositories[] = $repository;
-			}
-		}
-	}
+        $fileContent = file_get_contents($this->path);
+        $repositories = explode("\n", $fileContent);
+        foreach($repositories as $repository) {
+            $repository = trim($repository);
+            if($this->_isHttp($repository)) {
+                $this->repositories[] = $repository;
+            }
+        }
+    }
 
-	/**
-	 * Verificar se a url do repositório é uma url válida
-	 */
-	function _isHttp($url) {
-		$pattern = "(http?://([-\w\.]+)+(:\d+)?(/([\w/_\.]*(\?\S+)?)?)?)";
-		return preg_match($pattern, $url);
-	}
+    /**
+    * Verificar se a url do repositório é uma url válida
+    */
+    function _isHttp($url) {
+        $pattern = "(http?://([-\w\.]+)+(:\d+)?(/([\w/_\.]*(\?\S+)?)?)?)";
+        return preg_match($pattern, $url);
+    }
 
-	/**
-	 * Localiza uma url na lista de repositorios
-	 */
-	function _exists($url) {
-		if (array_search($url, $this->repositories) === false) {
-			return false;
-		}
-		return true;
-	}
+    /**
+    * Localiza uma url na lista de repositorios
+    */
+    function _exists($url) {
+        if (array_search($url, $this->repositories) === false) {
+            return false;
+        }
+        return true;
+    }
 
-	/**
-	 * Salva a lista de repositorios no arquivo .reps
-	 */
-	function _save() {
-		$contents = implode("\n", $this->repositories);
-		if (file_put_contents($this->path, $contents) === false) {
-			return false;
-		}
+    /**
+    * Salva a lista de repositorios no arquivo .reps
+    */
+    function _save() {
+        $contents = implode("\n", $this->repositories);
+        if (file_put_contents($this->path, $contents) === false) {
+            return false;
+        }
 
-		return true;
-	}
+        return true;
+    }
 
-	function _select() {
-		if (empty($this->repositories)) {
-			$this->formattedOut(__d('plugin', "Nao existem repositorios para serem listados\n", true));
-			$this->stop();
-		}
+    function _select() {
+        if (empty($this->repositories)) {
+            $this->formattedOut(__d('plugin', "Nao existem repositorios para serem listados\n", true));
+            $this->stop();
+        }
 
-		$this->formattedOut(__d('plugin', 'Selecione um Repositorio para remover', true));
-		$this->out('');
+        $this->formattedOut(__d('plugin', 'Selecione um Repositorio para remover', true));
+        $this->out('');
 
-		foreach ($this->repositories as $key => $repository) {
-			$this->formattedOut(String::insert(__d('plugin', '[fg=green](:counter)[/fg]  [u]:rep_url[/u]', true), array('counter' => ($key + 1), 'rep_url' => $repository)));
-		}
+        foreach ($this->repositories as $key => $repository) {
+            $this->formattedOut(String::insert(__d('plugin', '[fg=green](:counter)[/fg]  [u]:rep_url[/u]', true), array('counter' => ($key + 1), 'rep_url' => $repository)));
+        }
 
-		$options = range(1, count($this->repositories));
-		$selected = $this->in(__d('plugin', '(q) para sair', true));
-		
-		if ($selected == 'q') {
-			$this->_stop();
-		}
-		
-		$selected = intval($selected) - 1;
-		
-		if (isset($this->repositories[$selected])) {
-			return $this->repositories[$selected];
-		}
-		return false;
-	}
+        $options = range(1, count($this->repositories));
+        $selected = $this->in(__d('plugin', '(q) para sair', true));
 
-	/**
-	 * Mostra o conteúdo de um repositório
-	 */
-	function _show($url, $proxy = false) {
-		$this->formattedOut(String::insert(__d('plugin', "Listando plugins disponiveis em [u]:rep_url[/u]\n", true), array('rep_url' => $url)));
+        if ($selected == 'q') {
+            $this->_stop();
+        }
 
-		$plugins = $this->_plugins($url, $proxy);
-		foreach ($plugins as $key => $plugin) {
-			$out = String::insert(__d('plugin', "[fg=green]    :pluginName", true), array('pluginName'=> $plugin['name']));
+        $selected = intval($selected) - 1;
 
-			if ($this->Plugins->_exists($plugin)) {
-				$out .= __d('plugin', " *[/fg]\n", true);
-			} else {
-				$out .= String::insert(__d('plugin', "[/fg]\n      :pluginUrl\n", true), array('pluginUrl' => $plugin['url']));
-			}
+        if (isset($this->repositories[$selected])) {
+            return $this->repositories[$selected];
+        }
+        return false;
+    }
 
-			$this->formattedOut($out);
-		}
+    /**
+    * Mostra o conteúdo de um repositório
+    */
+    function _show($url, $proxy = false) {
+        $this->formattedOut(String::insert(__d('plugin', "Listando plugins disponiveis em [u]:rep_url[/u]\n", true), array('rep_url' => $url)));
 
-		if (empty($pluginList[2])) {
-			$this->formattedOut(__d('plugin', 'Nao foram encontrados plugins no repositorio', true));
-		}
-	}
+        $plugins = $this->_plugins($url, $proxy);
+        foreach ($plugins as $key => $plugin) {
+            $out = String::insert(__d('plugin', "[fg=green]    :pluginName", true), array('pluginName'=> $plugin['name']));
 
-	/**
-	 * Retorna um array com os plugins do repositorio
-	 */
-	function _plugins($url = null, $proxy = false) {
-		if (empty($url)) {
-			$url = $this->repositories;
-		}
-		if (is_array($url)) {
-			$repositories = $url;
-			$allPlugins = array();
-			foreach ($repositories as $repository) {
-				$plugins = $this->_plugins($repository, $proxy);
-				$allPlugins = array_merge($allPlugins, $plugins);
-			}
-			return $allPlugins;
-		}
-		
-		$content = $this->_html($url, $proxy); 
+            if ($this->Plugins->_exists($plugin)) {
+                $out .= __d('plugin', " *[/fg]\n", true);
+            } else {
+                $out .= String::insert(__d('plugin', "[/fg]\n      :pluginUrl\n", true), array('pluginUrl' => $plugin['url']));
+            }
 
-		if ($content['erro']) {
-			$this->formattedOut(String::insert(__d('plugin', "\n[fg=black][bg=red] ERRO [/bg][/fg] :erro\n       Se voce usa proxy para se conectar a internet, tente usar a opcao\n       \"-proxy username:password@endereco.do.proxy:porta\"\n", true), array('erro' =>  $content['text'])));
+            $this->formattedOut($out);
+        }
 
-			$this->hr();
-			$this->_stop();
-		}
+        if (empty($pluginList[2])) {
+            $this->formattedOut(__d('plugin', 'Nao foram encontrados plugins no repositorio', true));
+        }
+    }
 
-		$this->_validateHttpErrors($content['text']);
+    /**
+    * Retorna um array com os plugins do repositorio
+    */
+    function _plugins($url = null, $proxy = false) {
+        if (empty($url)) {
+            $url = $this->repositories;
+        }
+        if (is_array($url)) {
+            $repositories = $url;
+            $allPlugins = array();
+            foreach ($repositories as $repository) {
+                $plugins = $this->_plugins($repository, $proxy);
+                $allPlugins = array_merge($allPlugins, $plugins);
+            }
+            return $allPlugins;
+        }
 
-		$plugins = array();
-		$text = html_entity_decode($content['text']);
-		preg_match_all('/\<li\>\<a href="(?P<url>.*)"\>(?P<name>.*)\<\/a\>\<\/li\>/i', $text, $plugins, PREG_SET_ORDER);
+        $content = $this->_html($url, $proxy);
 
-		return $plugins;
-	}
+        if ($content['erro']) {
+            $this->formattedOut(String::insert(__d('plugin', "\n[fg=black][bg=red] ERRO [/bg][/fg] :erro\n       Se voce usa proxy para se conectar a internet, tente usar a opcao\n       \"-proxy username:password@endereco.do.proxy:porta\"\n", true), array('erro' =>  $content['text'])));
 
-	/**
-	 * Pega o conteúdo html do repositorio usando o Curl
-	 */
-	function _html($url, $proxy = false) {
-		if (!function_exists('curl_init')) {
-			$this->formattedOut(__d('plugin', "\nA biblioteca [fg=black][bg=red]PHP CURL[/bg][/fg] nao esta habilitada.\nDescomente a linha com o conteudo\n[fg=red]  - [u]extension=php_curl.so[/u][/fg] ou\n[fg=red]  - [u]extension=php_curl.dll[/u][/fg]\nno php.ini\n", true));
-			$this->hr();
-			$this->_stop();
-		}
+            $this->hr();
+            $this->_stop();
+        }
 
-		$options = array(
-			CURLOPT_URL                  => $url,
-			CURLOPT_PROXY                => $proxy,
-			CURLOPT_TIMEOUT              => 10,
-			CURLOPT_HEADER               => true,
-			CURLOPT_MAXREDIRS            => 10,
-			CURLOPT_FOLLOWLOCATION       => true,
-			CURLOPT_RETURNTRANSFER       => true,
-			CURLOPT_FRESH_CONNECT        => true,
-			CURLOPT_HTTPHEADER           => array("Pragma: "),
-			CURLOPT_DNS_USE_GLOBAL_CACHE => false,
-			CURLOPT_DNS_CACHE_TIMEOUT    => 1,
-			CURLOPT_ENCODING             => 'deflate'
-		);
+       $this->_validateHttpErrors($content['text']);
 
-		$cu = curl_init();
-		curl_setopt_array($cu, $options);
+        $plugins = array();
+        $text = html_entity_decode($content['text']);
+// realiza o parseamento do documento xml com os plugins
+//         $plugins = $this->_parseXml($text);
+        preg_match_all('/\<li\>\<a href="(?P<url>.*)"\>(?P<name>.*)\<\/a\>\<\/li\>/i', $text, $plugins, PREG_SET_ORDER);
 
-		$content['text'] = curl_exec($cu);
-		if ($content['erro'] = curl_errno($cu)) {
-			$content['text'] = curl_error($cu);
-		}
+        return $plugins;
+    }
 
-		curl_close($cu);
+    function _parseXml($xmlDoc)
+    {
+        $document = new DOMDocument();
+        $document->preserveWhiteSpace = false;
+        $document->loadXML($xmlDoc);
+        $plugins = $document->getElementsByTagName('plugin');
 
-		return $content;
-	}
+        for ($i = 0; $i < $plugins->length; $i++)
+        {
+            foreach ($plugins->item($i)->childNodes as $plugin)
+            {
+                $return[$i][$plugin->nodeName] = $plugin->nodeValue;
+            }
+        }
+        return $return;
+    }
 
-	/**
-	 * Finaliza a execução do script em caso de erro no HTTP
-	 */
-	function _validateHttpErrors($text) {
-		if (!preg_match("/HTTP.* [2][0][0-6]/i", $text)) {
-			$error = array();
-			preg_match_all("/\<title\>(.*)\<\/title\>/i", $text, $error);
+    /**
+    * Pega o conteúdo html do repositorio usando o Curl
+    */
+    function _html($url, $proxy = false) {
+        if (!function_exists('curl_init')) {
+            $this->formattedOut(__d('plugin', "\nA biblioteca [fg=black][bg=red]PHP CURL[/bg][/fg] nao esta habilitada.\nDescomente a linha com o conteudo\n[fg=red]  - [u]extension=php_curl.so[/u][/fg] ou\n[fg=red]  - [u]extension=php_curl.dll[/u][/fg]\nno php.ini\n", true));
+            $this->hr();
+            $this->_stop();
+        }
 
-			$this->formattedOut(String::insert(__d('plugin', "\n[fg=black][bg=red] ERRO: :erro [/bg][/fg]\n", true), array('erro' =>  $error[1][0])));
-			$this->hr();
-			$this->_stop();
-		}
-	}
+        $options = array(
+            CURLOPT_URL                  => $url,
+            CURLOPT_PROXY                => $proxy,
+            CURLOPT_TIMEOUT              => 10,
+            CURLOPT_HEADER               => true,
+            CURLOPT_MAXREDIRS            => 10,
+            CURLOPT_FOLLOWLOCATION       => true,
+            CURLOPT_RETURNTRANSFER       => true,
+            CURLOPT_FRESH_CONNECT        => true,
+            CURLOPT_HTTPHEADER           => array("Pragma: "),
+            CURLOPT_DNS_USE_GLOBAL_CACHE => false,
+            CURLOPT_DNS_CACHE_TIMEOUT    => 1,
+            CURLOPT_ENCODING             => 'deflate'
+        );
+
+        $cu = curl_init();
+        curl_setopt_array($cu, $options);
+
+        $content['text'] = curl_exec($cu);
+        if ($content['erro'] = curl_errno($cu)) {
+            $content['text'] = curl_error($cu);
+        }
+
+        curl_close($cu);
+
+        return $content;
+    }
+
+    /**
+    * Finaliza a execução do script em caso de erro no HTTP
+    */
+    function _validateHttpErrors($text) {
+        if (!preg_match("/HTTP.* [2][0][0-6]/i", $text)) {
+            $error = array();
+            preg_match_all("/\<title\>(.*)\<\/title\>/i", $text, $error);
+
+            $this->formattedOut(String::insert(__d('plugin', "\n[fg=black][bg=red] ERRO: :erro [/bg][/fg]\n", true), array('erro' =>  $error[1][0])));
+            $this->hr();
+            $this->_stop();
+        }
+    }
 }
 ?>
